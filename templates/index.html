@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h2>ダッシュボード</h2>
+
+    <div class="dashboard-summary">
+        <h3>サークル全体の繰越金</h3>
+        <p class="total-surplus">{{ total_surplus }} 円</p>
+    </div>
+
+    <hr>
+
+    <div class="navigation-links">
+        <a href="{{ url_for('manage_members') }}">メンバー管理</a>
+        <a href="{{ url_for('events_list') }}">全イベント一覧</a>
+    </div>
+
+    <hr>
+
+    <h3>最近のイベント</h3>
+    {% if recent_events %}
+        <ul>
+            {% for event in recent_events %}
+            <li>
+                {{ event.event_date.strftime('%Y/%m/%d') }} - 
+                <a href="{{ url_for('event_detail', event_id=event.id) }}">{{ event.name }}</a>
+                {% if event.surplus > 0 %}
+                    (差額: {{ event.surplus }} 円)
+                {% else %}
+                    (不足額: {{ -1 * event.surplus }} 円)
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>まだイベントはありません。</p>
+    {% endif %}
+
+{% endblock %}

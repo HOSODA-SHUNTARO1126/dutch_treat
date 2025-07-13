@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h2>メンバー管理</h2>
+
+    <form method="POST" action="{{ url_for('add_member') }}">
+        <label for="name">新しいメンバーの名前:</label>
+        <input type="text" id="name" name="name" required>
+        <button type="submit">登録</button>
+    </form>
+
+    <hr>
+
+    <h3>メンバー一覧</h3>
+
+    {% if members %}
+        <ul>
+            {% for member in members %}
+            <li>
+                {{ member.name }}
+                <form method="POST" action="{{ url_for('delete_member', member_id=member.id) }}" style="display:inline;">
+                    <button type="submit" onclick="return confirm('本当に削除しますか？');">削除</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>まだメンバーが登録されていません。</p>
+    {% endif %}
+
+    <a href="{{ url_for('index') }}">トップページに戻る</a>
+{% endblock %}

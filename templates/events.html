@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h2>イベント管理</h2>
+    <form method="POST" action="{{ url_for('add_event') }}">
+        <label for="name">イベント名:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="event_date">開催日:</label>
+    z  <input type="date" id="event_date" name="event_date" required>
+
+        <button type="submit">イベント作成</button>
+    </form>
+
+    <hr>
+    <h3>イベント一覧</h3>
+
+    {% if events %}
+        <table>
+            <thead>
+                <tr>
+                    <th>開催日</th>
+                    <th>イベント名</th>
+                    <th>費用合計</th>
+                    <th>集金総額</th>
+                    <th>差額（繰越金）</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in events %}
+                <tr>
+                    <td>{{ event.event_date.strftime('%Y/%m/%d') }}</td>
+                    <td>{{ event.name }}</td>
+                    <td>{{ event.total_cost }} 円</td>
+                    <td>{{ event.collected_amount }} 円</td>
+                    <td>{{ event.surplus }} 円</td>
+                    <td><a href="{{ url_for('event_detail', event_id=event.id) }}">詳細・会計</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>まだイベントがありません。</p>
+    {% endif %}
+
+    <a href="{{ url_for('index') }}">トップページに戻る</a>
+{% endblock %}

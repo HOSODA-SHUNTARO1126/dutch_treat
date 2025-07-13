@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h2>イベント詳細: {{ event.name }}</h2>
+    <p>開催日: {{ event.event_date.strftime('%Y/%m/%d') }}</p>
+
+    <hr>
+
+    <h3>出席者 ({{ event.payment_statuses.count() }}名)</h3>
+    <form method="POST">
+        {% for member in members %}
+        <div>
+            <input type="checkbox" name="attendees" value="{{ member.id }}" id="member_{{ member.id }}"
+                {% if member.id in attendee_ids %}checked{% endif %}>
+            <label for="member_{{ member.id }}">{{ member.name }}</label>
+        </div>
+        {% endfor %}
+        <button type="submit" name="update_attendees" value="1">出席者を更新</button>
+    </form>
+
+    <hr>
+
+    <h3>会計</h3>
+
+    <form method="POST" action="{{ url_for('add_cost', event_id=event.id) }}">
+        <label for="description">項目:</label>
+        <input type="text" name="description" required>
+        <label for="amount">金額:</label>
+        <input type="number" name="amount" required> 円
+        <button type="submit">費用追加</button>
+    </form>
+
+    <h4>費用一覧 (合計: {{ event.total_cost }} 円)</h4>
+    <ul>
+        {% for cost in event.costs %}
+        <li>
+            {{ cost.description }}: {{ cost.amount }} 円
+            <form method="POST" action="{{ url_for('delete_cost', cost_id=cost.id) }}" style="display:inline;">
+                <button type="submit" onclick="return confirm('この項目を削除しますか？');">削除</button>
+            </form>
+        </li>
+        {% else %}
+        <li>まだ費用が登録されていません。</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+    <h4>会計サマリー</h4>
+    <p>一人あたりの費用（目安）:
+        {% if event.payment_statuses.count() > 0 %}
+            {{ (event.total_cost / event.payment_statuses.count()) | round(0, 'ceil') | int }} 円
+        {% else %}
+            0 円
+        {% endif %}
+    </p>
+    <form method="POST">
+        <label for="collected_per_person">一人あたりの集金額:</label>
+        <input type="number" name="collected_per_person"
+               value="{{ (event.collected_amount / event.payment_statuses.count())|round|int if event.payment_statuses.count() > 0 else 0 }}">
+        円
+        <button type="submit" name="update_collection_amount" value="1">集金額を再計算</button>
+    </form>
+
+    <p><strong>集金総額: {{ event.collected_amount }} 円</strong></p>
+    {% if event.total_cost > event.collected_amount %}
+        <p><strong>不足額： {{ event.total_cost - event.collected_amount }} 円</strong></p>
+    {% else %}
+        <p><strong>差額: {{ event.surplus }} 円</strong></p>
+    {% endif %}
+
+    <hr>
+    <h4>支払い状況</h4>
+    <form method="POST">
+        {% for status in event.payment_statuses.all() %}
+            <div>
+                <input type="checkbox" name="paid_members" value="{{ status.member.id }}" id="paid_{{ status.member.id }}"
+                       {% if status.has_paid %}checked{% endif %}>
+                <label for="paid_{{ status.member.id }}">
+                    {{ status.member.name }}
+                    {% if status.has_paid %} (支払い済み ✅) {% else %} (未払い) {% endif %}
+                </label>
+            </div>
+        {% else %}
+            <p>まだ出席者が登録されていません。</p>
+        {% endfor %}
+        <button type="submit" name="update_payments" value="1">支払い状況を更新</button>
+    </form>
+
+    <br>
+    <a href="{{ url_for('events_list') }}">イベント一覧に戻る</a>
+{% endblock %}
