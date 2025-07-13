@@ -2,12 +2,17 @@
 
 {% block content %}
     <h2>イベント管理</h2>
+
+    <div>
     <form method="POST" action="{{ url_for('add_event') }}">
         <label for="name">イベント名:</label>
         <input type="text" id="name" name="name" required>
+    </div>
 
+    <div>
         <label for="event_date">開催日:</label>
-    z  <input type="date" id="event_date" name="event_date" required>
+        <input type="date" id="event_date" name="event_date" required>
+    </div>
 
         <button type="submit">イベント作成</button>
     </form>
